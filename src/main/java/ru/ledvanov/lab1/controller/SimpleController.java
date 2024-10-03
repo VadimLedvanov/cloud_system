@@ -10,7 +10,7 @@ public class SimpleController {
 
     @GetMapping("/api/hello")
     public String hello() {
-        return "This is message from backend part!";
+        return "That's message from backend part!";
     }
 
     @GetMapping()
