@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-service
+  labels:
+    app: simple-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: simple-service
+  template:
+    metadata:
+      labels:
+        app: simple-service
+    spec:
+      containers:
+      - name: simple-service
+        image: lampenkopf/simple-service:latest
+        ports:
+        - containerPort: 3000
