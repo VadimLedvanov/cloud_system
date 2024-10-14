@@ -1,0 +1,33 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-service
+  template:
+    metadata:
+      labels:
+        app: simple-service
+    spec:
+      containers:
+      - name: simple-service
+        image: <your-dockerhub-username>/simple-service:latest
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-service-service
+spec:
+  type: NodePort
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30002
+  selector:
+    app: simple-service
