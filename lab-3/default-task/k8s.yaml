@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: simple-service
-        image: <your-dockerhub-username>/simple-service:latest
+        image: lampenkopf/simple-service:latest
         ports:
         - containerPort: 3000
 ---
@@ -25,9 +25,11 @@ metadata:
   name: simple-service-service
 spec:
   type: NodePort
-  ports:
-  - port: 3000
-    targetPort: 3000
-    nodePort: 30002
   selector:
     app: simple-service
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+    nodePort: 30002
+  
