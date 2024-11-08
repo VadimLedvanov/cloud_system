@@ -3,40 +3,48 @@ properties([
         choice(
             name: 'typeParam',
             choices: ['Integer Squares', 'Non-Integer Squares'],
-            description: 'Выберите тип'
+            description: 'Выберите тип: Integer Squares (целые квадраты) или Non-Integer Squares (нецелые квадраты)'
         ),
         string(
             name: 'integer_squares_param',
-            description: 'Введите число'
+            description: 'Введите число, для которого нужно вычислить корень'
         )
     ])
 ])
 
 pipeline {
-    agent any
+    agent { label 'specific-agent' }
 
     stages {
-        stage('Root Calc') {
+        stage('Input Validation') {
             steps {
                 script {
-                    try {
-                        def type = params.typeParam
-                        def number = params.integer_squares_param
-                        double parsedNumber = Double.parseDouble(number)
-                        
-                        double result = calculateSquareRoot(parsedNumber)
-                        
-                        validateRoot(type, result)
-                        echo "Корень из ${number} равен ${result}"
-                    } catch (Exception e) {
-                        echo "Ошибка: ${e.message}"
+                    if (!params.integer_squares_param.isDouble()) {
+                        error("Значение должно быть числом")
                     }
+                }
+            }
+        }
+
+        stage('Root Calculation') {
+            steps {
+                script {
+                    def type = params.typeParam
+                    double number = Double.parseDouble(params.integer_squares_param)
+                    double result = calculateSquareRoot(number)
+
+                    validateRoot(type, result)
+
+                    echo String.format("Корень из %.2f равен %.2f", number, result)
                 }
             }
         }
     }
     
     post {
+        always {
+            echo 'Завершение расчета, ресурсы освобождены'
+        }
         success {
             echo 'Расчет выполнен успешно!'
         }
@@ -46,11 +54,13 @@ pipeline {
     }
 }
 
-def calculateSquareRoot(number) {
+@NonCPS
+def calculateSquareRoot(double number) {
     return Math.sqrt(number)
 }
 
-def validateRoot(type, result) {
+@NonCPS
+def validateRoot(String type, double result) {
     if (type == 'Integer Squares' && !(result % 1 == 0)) {
         throw new IllegalArgumentException("Результат корня не является целым числом, что не соответствует типу 'Integer Squares'")
     } else if (type == 'Non-Integer Squares' && result % 1 == 0) {
