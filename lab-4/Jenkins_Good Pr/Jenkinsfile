@@ -1,0 +1,59 @@
+properties([
+    parameters([
+        choice(
+            name: 'typeParam',
+            choices: ['Integer Squares', 'Non-Integer Squares'],
+            description: 'Выберите тип'
+        ),
+        string(
+            name: 'integer_squares_param',
+            description: 'Введите число'
+        )
+    ])
+])
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Root Calc') {
+            steps {
+                script {
+                    try {
+                        def type = params.typeParam
+                        def number = params.integer_squares_param
+                        double parsedNumber = Double.parseDouble(number)
+                        
+                        double result = calculateSquareRoot(parsedNumber)
+                        
+                        validateRoot(type, result)
+                        echo "Корень из ${number} равен ${result}"
+                    } catch (Exception e) {
+                        echo "Ошибка: ${e.message}"
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Расчет выполнен успешно!'
+        }
+        failure {
+            echo 'Произошла ошибка в процессе расчета.'
+        }
+    }
+}
+
+def calculateSquareRoot(number) {
+    return Math.sqrt(number)
+}
+
+def validateRoot(type, result) {
+    if (type == 'Integer Squares' && !(result % 1 == 0)) {
+        throw new IllegalArgumentException("Результат корня не является целым числом, что не соответствует типу 'Integer Squares'")
+    } else if (type == 'Non-Integer Squares' && result % 1 == 0) {
+        throw new IllegalArgumentException("Результат корня является целым числом, что не соответствует типу 'Non-Integer Squares'")
+    }
+}
