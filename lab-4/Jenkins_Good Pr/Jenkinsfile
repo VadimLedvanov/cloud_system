@@ -13,43 +13,59 @@ properties([
 ])
 
 pipeline {
-    agent { label 'specific-agent' }
-
+    agent any
     stages {
         stage('Input Validation') {
             steps {
                 script {
                     if (!params.integer_squares_param.isDouble()) {
-                        error("Значение должно быть числом")
+                        error("Введено неверное значение. Пожалуйста, введите число.")
                     }
+                    echo "Введенное число: ${params.integer_squares_param}"
+                }
+            }
+        }
+        
+        stage('Calculation') {
+            steps {
+                script {
+                    double number = Double.parseDouble(params.integer_squares_param)
+                    double result = calculateSquareRoot(number)
+                    currentBuild.description = "Результат: ${result}" 
+                    echo "Корень из ${number} равен ${result}"
                 }
             }
         }
 
-        stage('Root Calculation') {
+        stage('Validation') {
             steps {
                 script {
-                    def type = params.typeParam
-                    double number = Double.parseDouble(params.integer_squares_param)
-                    double result = calculateSquareRoot(number)
+                    double result = currentBuild.description.split(': ')[1].toDouble()
+                    if (params.typeParam == 'Integer Squares' && result % 1 != 0) {
+                        error("Результат не является целым числом!")
+                    } else if (params.typeParam == 'Non-Integer Squares' && result % 1 == 0) {
+                        error("Результат является целым числом, что не соответствует типу 'Non-Integer Squares'")
+                    }
+                    echo "Валидация прошла успешно!"
+                }
+            }
+        }
 
-                    validateRoot(type, result)
-
-                    echo String.format("Корень из %.2f равен %.2f", number, result)
+        stage('Output') {
+            steps {
+                script {
+                    echo "Корень вычислен и проверен: ${currentBuild.description}"
                 }
             }
         }
     }
     
     post {
-        always {
-            echo 'Завершение расчета, ресурсы освобождены'
-        }
         success {
             echo 'Расчет выполнен успешно!'
         }
         failure {
-            echo 'Произошла ошибка в процессе расчета.'
+            echo 'Произошла ошибка при расчете.'
         }
     }
 }
@@ -57,13 +73,4 @@ pipeline {
 @NonCPS
 def calculateSquareRoot(double number) {
     return Math.sqrt(number)
-}
-
-@NonCPS
-def validateRoot(String type, double result) {
-    if (type == 'Integer Squares' && !(result % 1 == 0)) {
-        throw new IllegalArgumentException("Результат корня не является целым числом, что не соответствует типу 'Integer Squares'")
-    } else if (type == 'Non-Integer Squares' && result % 1 == 0) {
-        throw new IllegalArgumentException("Результат корня является целым числом, что не соответствует типу 'Non-Integer Squares'")
-    }
 }
