@@ -1,0 +1,89 @@
+properties([
+    parameters([
+        choice(
+            name: 'typeParam',
+            choices: ['Integer Squares', 'Non-Integer Squares'],
+            description: 'Выберите тип: Integer Squares (целые квадраты) или Non-Integer Squares (нецелые квадраты)'
+        ),
+        string(
+            name: 'integer_squares_param',
+            description: 'Введите число, для которого нужно вычислить корень'
+        )
+    ])
+])
+
+pipeline {
+    agent any
+    stages {
+        stage('Input Validation') {
+            steps {
+                script {
+                    if (!params.integer_squares_param.isDouble()) {
+                        error("Введено неверное значение. Пожалуйста, введите число.")
+                    }
+                    echo "Введенное число: ${params.integer_squares_param}"
+                }
+            }
+        }
+        
+        stage('Calculation') {
+            steps {
+                script {
+                    double number = Double.parseDouble(params.integer_squares_param)
+                    double result = calculateSquareRoot(number)
+                    currentBuild.description = "Результат: ${result}" 
+                    echo "Корень из ${number} равен ${result}"
+                }
+            }
+        }
+
+        stage('Validation') {
+            steps {
+                script {
+                    double result = currentBuild.description.split(': ')[1].toDouble()
+                    if (params.typeParam == 'Integer Squares' && result % 1 != 0) {
+                        error("Результат не является целым числом!")
+                    } else if (params.typeParam == 'Non-Integer Squares' && result % 1 == 0) {
+                        error("Результат является целым числом, что не соответствует типу 'Non-Integer Squares'")
+                    }
+                    echo "Валидация прошла успешно!"
+                }
+            }
+        }
+
+        stage('Output') {
+            steps {
+                script {
+                    echo "Корень вычислен и проверен: ${currentBuild.description}"
+                }
+            }
+        }
+        stage('Retrieve Secret from Vault') {
+            steps {
+                script {
+                    withVault([
+                        vaultSecrets: [[path: 'secret/myapp', secretValues: [[envVar: 'MY_SECRET', vaultKey: 'password']]]],
+                        credentialsId: 'access-credential'
+                    ]) {
+                        echo "Секрет успешно получен из Vault и используется."
+                    }
+                }
+            }
+        }
+
+    }
+    
+    post {
+        success {
+            echo 'Расчет выполнен успешно!'
+        }
+        failure {
+            echo 'Произошла ошибка при расчете.'
+        }
+    }
+}
+
+@NonCPS
+def calculateSquareRoot(double number) {
+    return Math.sqrt(number)
+}
