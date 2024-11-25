@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      COOL_IP: 0.0.0.0
+      COOL_PORT: 8080
+      COOL_LOG: /var/log
+    volumes:
+      - ./backend/logs:/var/log
+      - ./backend/config:/usr/share/cool-app/
+    ports:
+      - "8080:8080"
+    networks:
+      backend_net:
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    depends_on:
+      - backend
+    networks:
+      frontend_net:
+
+networks:
+  backend_net:
+    driver: bridge
+  frontend_net:
+    driver: bridge

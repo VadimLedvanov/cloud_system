@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      COOL_IP: 0.0.0.0
+      COOL_PORT: 8080
+      COOL_LOG: /var/log
+    volumes:
+      - ./backend/logs:/var/log
+      - ./backend/config:/usr/share/cool-app/
+    ports:
+      - "8080:8080"
+    networks:
+      - cool-net
+    command: |
+      bash -c "
+        if [ ! -f /usr/share/cool-app/cool-text.txt ]; then
+          echo 'cool-text.txt is missing, creating a default one' > /usr/share/cool-app/cool-text.txt;
+        fi;
+        python /app/backend.py
+      "
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    depends_on:
+      - backend
+    networks:
+      - cool-net
+    command: bash -c "python /app/frontend.py"
+
+networks:
+  cool-net:
+    driver: bridge
+
