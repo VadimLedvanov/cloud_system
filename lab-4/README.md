@@ -1,4 +1,4 @@
-В "плохом" пайплайне:
+![изображение](https://github.com/user-attachments/assets/c7ef6dcf-5325-40c5-a52a-bf6906a95187)В "плохом" пайплайне:
 
 
 1)	В этом примере не проверяется, является ли число “integer_squares_param” целым числом. Если пользователь введёт не число, то может возникнуть внутренняя ошибка Groovy при преобразовании.
@@ -26,3 +26,31 @@
 
 5)	Используется метод calculateSquareRoot для расчета значения корня. 
 Это позволяет использовать код повторно и облегчает его изменение.
+
+Скрины запуска bad PR:
+1) Нажимаем на 'Build with Parameters'
+![изображение](https://github.com/user-attachments/assets/28bfe657-e9f3-4804-a883-cc7a3ea78986)
+
+2) вводим integer_squares_param и нажимаем build
+![изображение](https://github.com/user-attachments/assets/102c3693-304d-4fdf-9a5c-4d4744708651)
+3) Пайплайн №5 выпонен успешно
+![изображение](https://github.com/user-attachments/assets/bf035efb-7f64-49a2-9837-e2945e82a5e2)
+
+
+Скрины запуска good PR:
+1)Нажимаем на 'Build with Parameters'
+![изображение](https://github.com/user-attachments/assets/12f0f594-75a2-4f8d-9b28-201b4f7ee855)
+
+
+2)вводим integer_squares_param и нажимаем build
+![изображение](https://github.com/user-attachments/assets/72aa716a-48e4-41d0-8f84-0dbbbcff8f68)
+
+
+3) Пайплайн №20 выпонен успешно
+![изображение](https://github.com/user-attachments/assets/7522131e-ab20-4f1b-b67c-365ac3052b6e)
+
+4) Вводим, чтобы корень нацело не извлекался
+![изображение](https://github.com/user-attachments/assets/28355982-5eb7-4d4e-9eec-70a0470b582a)
+
+5) Пайплайн №21 выпонен не успешно
+![изображение](https://github.com/user-attachments/assets/bb4f0cf2-9cb0-4c17-a900-c77501a8fc09)
